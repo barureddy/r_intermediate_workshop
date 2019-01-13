@@ -1,0 +1,157 @@
+---
+title: "First Report"
+author: "Bharat Reddy"
+date: "January 12, 2019"
+output: 
+  html_document:
+    toc: TRUE
+    self_contained: FALSE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Initial Analysis
+## Reading In Data
+```{r read_data, message=FALSE}
+library(tidyverse)
+
+counts_raw <- read_delim("data/counts-raw.txt.gz", delim="\t")
+
+```
+
+##Diagnostic Plots
+```{r histogram_weeks_since_pubs, fig.height=3, fig.width=5, fig.cap="Figure 1: Weeks since publication per paper."}
+weeks_since_pub <- counts_raw$daysSincePublished / 7
+hist(weeks_since_pub, xlab ="# of Weeks", main = "Weeks Since Publication")
+
+```
+
+```{r scatterplots}
+plot(counts_raw$daysSincePublished, counts_raw$wosCountThru2011)
+
+
+```
+
+## Same vague statements about our data
+Here is an example of a mathematical function: $y = x^2$ 
+
+This dataset consists of `r dim(counts_raw)[1] ` publications.
+
+<!-- This is line is shit. -->
+```{r ex1, fig.cap="I like to see how many PDFs that were downloaded"}
+hist(counts_raw$pdfDownloadsCount)
+plot(counts_raw$pdfDownloadsCount, counts_raw$wosCountThru2011)
+plot(log(counts_raw$pdfDownloadsCount), counts_raw$wosCountThru2011)
+
+
+```
+
+
+#Refresher on functions in R
+
+```{r}
+counts_raw$authorsCount
+counts_raw[,"authorsCount"]
+counts_raw[["authorsCount"]]
+
+data_column <-"authorsCount"
+counts_raw[[data_column]]
+
+data <- counts_raw[[data_column]]
+
+lo
+
+plot(x = counts_raw$wosCountThru2011, counts_raw$authorsCount)
+
+
+plot_log_data <- function(input_dataframe,column){
+  data_column<-input_dataframe[[column]]
+  log_data_column<-log(data_column)
+  return(log_data_column)
+  
+}
+
+
+
+
+```
+
+
+
+
+
+
+
+
+```{r}
+publication_date <- counts_raw$pubDate
+head(publication_date)
+
+run_unique <- function(x){
+  unique_data <- unique(x)
+  return(length(unique_data))
+}
+
+run_unique(x=counts_raw$doi)
+
+```
+
+
+
+```{r}
+column_num_unique <- function(data, column_name){
+  data_column <- data[[column_name]]
+  unique_entries <- run_unique(data_column)
+  return(unique_entries)
+  
+}
+
+column_num_unique(data = counts_raw, column_name = "doi")
+
+```
+
+
+
+#For Loop
+
+```{r}
+names_of_columns<- colnames(counts_raw)
+
+uniq_col_ct<-function(data){
+  data_column_names<-colnames(data)
+  output_length <- length(data_column_names)
+  result <- integer(output_length)
+  
+  for(i in seq_along(data_column_names)){
+    my_column<-data_column_names[i]
+    result[i]<-column_num_unique(data,my_column)
+  }
+  return(result)  
+}
+
+uniq_col_ct(counts_raw)
+
+```
+#
+
+```{r}
+counts_columns <- c("facebookShareCount","facebookLikeCount")
+
+max_of_each_col <- function(data, count_colnames){
+  number_of_columns<-length(count_colnames)
+  result<-integer(number_of_columns)
+  for(i in seq_along(result)){
+    my_column<-count_colnames[i]
+    my_vector<- data[[my_column]]
+    result[i]<-max(my_vector)
+    print(my_vector)
+  }
+  return(result)
+}
+
+max_of_each_col(counts_raw, counts_columns)
+
+
+```
+

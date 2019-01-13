@@ -1,0 +1,219 @@
+---
+title: "Trial Report"
+author: "Arjun Biddanda"
+date: "1/12/2019"
+output: 
+  html_document:
+    toc : true
+    number_sections : true
+    highlight : espresso
+    fig_caption : yes
+    self_contained : false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Initial Analysis
+
+## Reading in data on PLoS Papers
+
+```{r read_data, results='hide', message=FALSE}
+library(tidyverse)
+counts_raw <- read_delim("data/counts-raw.txt.gz", delim = "\t")
+n_pubs <- dim(counts_raw)[1]
+```
+
+## Diagnostic Plots
+
+```{r histogram_weeks_since_pubs, fig.cap="Figure 1 : Weeks since publication per paper", fig.height=3, fig.width=5}
+  weeks_since_pub <- counts_raw$daysSincePublished / 7
+  hist(weeks_since_pub, xlab = "# of Weeks", main="Weeks since Publication")
+```
+
+```{r scatterplot_pubs_vs_citations}
+plot(counts_raw$daysSincePublished, counts_raw$wosCountThru2011)
+```
+
+## Some vague statements about our data
+
+Here is an example of a mathematical function : $y = x^2$
+
+This dataset consists of `r n_pubs` publications.
+
+## Exercise : 
+
+  1. Plot a histogram of your favorite variable from the dataset
+  2. make a scatter plot of your favorite variable against citation counts
+    a. Comment on whether it has a marked effect on citation counts
+    b. If appropriate create a scatter plot of log-transformed values
+  3. Verify that the plots would be well-received by a collaborator!!
+
+## Result
+
+```{r}
+hist(counts_raw$year, xlab="Year", main="Number of Publications per Year")
+```
+
+
+```{r}
+plot(counts_raw$year,counts_raw$wosCountThru2011)
+```
+
+
+### A quick refresher on functions in `R`
+
+
+```{r}
+
+
+counts_raw[,"authorsCount"]
+counts_raw[["authorsCount"]]
+
+
+data <- counts_raw$authorsCount
+plot(x = counts_raw$wosCountThru2011,y=data)
+
+data_column <- "deliciousCount"
+data <- counts_raw[[data_column]]
+log_data <-log(data)
+plot(x = counts_raw$wosCountThru2011,y=log_data)
+
+
+
+```
+
+
+```{r}
+log_data <- function(input_dataframe,column){
+  data_column <- input_dataframe[[column]]
+  log_data_column <- log(data_column)
+  return(log_data_column)
+}
+
+output <- log_data(input_dataframe = counts_raw,
+         column = "deliciousCount")
+plot(x = counts_raw$authorsCount,y=output)
+```
+
+```{r}
+publication_date <-counts_raw$pubDate
+head(publication_date)
+
+num_unique <- function(x){
+  unique_data <- unique(x)
+  length_unique <- length(unique_data)
+  return(length_unique)
+}
+debug(num_unique)
+num_unique(x = counts_raw$pubDate)
+```
+
+```{r}
+column_num_unique <- function(data,column_name){
+  data_column <- data[[column_name]]
+  if(is.null(data_column)){
+    stop("No such column in data!")
+  }
+  unique_entries <- num_unique(data_column)
+  return(unique_entries)
+}
+debug(column_num_unique)
+column_num_unique(data = counts_raw,column_name = "doi")
+
+```
+
+### For loops and for fun
+
+
+```{r}
+fake_fun <- function(){
+ x <- 4 
+  
+  
+}
+```
+
+
+```{r}
+names_of_columns <- colnames(counts_raw)
+my_column <- "doi"
+column_num_unique(data = counts_raw,
+                  column_name = my_column)
+
+unique_col_ct <- function(data){
+  data_column_names <- colnames(data)
+  output_length <- length(data_column_names)
+  result <- integer(output_length)
+  for(i in seq_along(data_column_names)){
+    my_column <- data_column_names[i]
+    result[i] <- column_num_unique(data,my_column)
+  }
+  print("we finished!")
+  return(result)
+}
+
+debug(unique_col_ct)
+doy_cols <- which(colnames(counts_raw)=="doy")
+unique_col_ct(counts_raw[,doy_cols])
+```
+
+
+```{r}
+counts_columns <- c("facebookShareCount",
+                    "facebookLikeCount")
+
+max_of_each_col <- function(data,count_colnames){
+  number_of_columns <- length(count_colnames)
+  result <- integer(number_of_columns)
+  for(i in seq_along(count_colnames)){
+    my_column <- count_colnames[i]
+    my_vector <- data[[my_column]]
+    result[i] <- max(my_vector)
+  }
+  return(result)
+}
+
+debug(max_of_each_col)
+max_of_each_col(counts_raw,counts_columns)
+
+```
+
+
+## Quick refresher on subsetting with R
+
+There are many ways to subset data in R
+### We can subset a vecter by position with `[`
+```{r}
+x <- c(8,9,3,5,7)
+x[4]
+y <- c(1,2)
+x[y]
+z <- length(x)
+x[z]
+```
+We can also subset using double bracket syntax
+to get *one* element back
+```{r}
+x[[1]]
+x[[y]]
+```
+## Indexing dataframes
+Dataframes can also be indexed with single bracket `[` and double bracket `[[` syntax depending on what we want
+
+```{r}
+counts_raw[,1]
+y <- c(1,2)
+counts_raw[,y]
+counts_raw[,c("doi","daysSincePublished")]
+(counts_vector <- counts_raw[["doi"]])
+(doi_dataframe <- counts_raw[,"doi"])
+```
+
+
+
+
+
+
+
